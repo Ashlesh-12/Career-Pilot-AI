@@ -1,6 +1,6 @@
 from typing import Any
 from fastapi import APIRouter, HTTPException, status
-from app.schemas.jobs import JobResponse, JobCreate
+from app.schemas.jobs import JobResponse, JobCreate, JobUpdate
 
 router = APIRouter()
 
@@ -60,7 +60,7 @@ async def get_job_by_id(job_id: int) -> JobResponse:
         detail=f"{job_id} not found",
     )
 
-@router.post("/jobs", response_model=JobCreate, status_code= status.HTTP_201_CREATED,)
+@router.post("/jobs", response_model=JobResponse, status_code= status.HTTP_201_CREATED,)
 async def create_jobs(job_data: JobCreate) -> JobResponse:
     new_id = 0
     for job in JOBS:
@@ -74,3 +74,32 @@ async def create_jobs(job_data: JobCreate) -> JobResponse:
     
     JOBS.append(new_job)
     return new_job
+
+@router.patch("/jobs/{job_id}", response_model=JobResponse)
+async def update_job(job_id: int, job_data: JobUpdate) -> JobResponse:
+    updates = job_data.model_dump(
+         exclude_unset=True,
+         exclude_none=True,
+    )
+    print(updates)
+     
+    if not updates:
+        raise HTTPException(
+            status_code=400,
+            detail="At least one non-null field must be provided",
+        )
+     
+    for index, job in enumerate(JOBS):
+         if job_id == job.id:
+            # merging dictionaries
+            updated_data = job.model_dump() | updates
+            print(updated_data) 
+            # converted back into object
+            updated_job = JobResponse(**updated_data)
+             
+            JOBS[index] = updated_job
+            
+            return updated_job
+    
+    raise HTTPException(status_code=404, detail=f"Job with ID {job_id} not found")
+             

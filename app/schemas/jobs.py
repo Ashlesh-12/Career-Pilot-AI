@@ -13,3 +13,9 @@ class JobCreate(BaseModel):
     location: str
     required_skills: list[str]
     
+class JobUpdate(BaseModel):
+    title: str | None = None
+    company: str | None = None
+    location: str | None = None
+    required_skills: list[str] | None = None
+    

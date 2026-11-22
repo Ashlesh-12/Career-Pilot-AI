@@ -102,4 +102,13 @@ async def update_job(job_id: int, job_data: JobUpdate) -> JobResponse:
             return updated_job
     
     raise HTTPException(status_code=404, detail=f"Job with ID {job_id} not found")
+
+@router.delete("/jobs/{job_id}")
+async def delete_job(job_id: int, status_code=status.HTTP_204_NO_CONTENT):
+    for index, job in enumerate(JOBS):
+        if job.id == job_id:
+            JOBS.pop(index)
+            return
+    
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{job_id} not found")
              

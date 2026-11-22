@@ -1,6 +1,6 @@
 from typing import Any
-from fastapi import APIRouter, HTTPException
-from app.schemas.jobs import JobResponse
+from fastapi import APIRouter, HTTPException, status
+from app.schemas.jobs import JobResponse, JobCreate
 
 router = APIRouter()
 
@@ -46,6 +46,8 @@ async def get_jobs(location: str | None = None, role: str | None = None) -> list
                 job_list.append(job)
         return job_list
     
+    return filtered_jobs
+    
 @router.get("/job/{job_id}", response_model=JobResponse)
 async def get_job_by_id(job_id: int) -> JobResponse:
     filtered_job = JOBS
@@ -56,4 +58,19 @@ async def get_job_by_id(job_id: int) -> JobResponse:
     raise HTTPException(
         status_code=404,
         detail=f"{job_id} not found",
-    )   
+    )
+
+@router.post("/jobs", response_model=JobCreate, status_code= status.HTTP_201_CREATED,)
+async def create_jobs(job_data: JobCreate) -> JobResponse:
+    new_id = 0
+    for job in JOBS:
+        new_id = max(job.id, new_id)
+    new_id += 1
+    
+    new_job = JobResponse(
+        id=new_id,
+        **job_data.model_dump(),
+    )
+    
+    JOBS.append(new_job)
+    return new_job

@@ -25,3 +25,10 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# db
+*.db
+*.sqlite
+*.sqlite3
+
+test.py
